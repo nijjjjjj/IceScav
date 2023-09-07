@@ -1,0 +1,92 @@
+local settingz = {
+
+    allowmusic = false, -- If you want the music or not.
+    instantteleport = false, -- When teleporting, this determines if the teleportation is instant or not.
+    custommusic = "holdout_fight2", -- Look in game.ReplicatedStorage.soundLibrary.songs to find songs to play, then input the name here.
+    itemtospawn = "IPick" -- Change this to any item ingame.
+
+}
+
+
+--[[made by ry
+
+VERSION 5 [FIRST RELEASE]
+load this in a round to pursue
+editable
+if your making a char script using this template, you can credit me if you want, your choice.
+
+]]--
+local rep = game:GetService("ReplicatedStorage")
+local animfolder = rep.animationSets.TPanimSets
+local plr = game.Players.LocalPlayer
+local char = plr.Character
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local posing = false
+local allowmusic = settingz.allowmusic
+local humanoiddied = false
+
+
+--anims
+animfolder.global.low_walk.AnimationId = animfolder.global.run.AnimationId
+animfolder.global.low_idle.AnimationId = animfolder.global.idle.AnimationId
+--func
+
+function spawn(Item)
+    local plrorigpos = char:WaitForChild("HumanoidRootPart").CFrame
+    local workbench = workspace.Interactables:FindFirstChild("Workbench")
+    local item = ""..Item..""
+    game.Players.LocalPlayer.Character:PivotTo(workbench:GetPivot() + Vector3.new(0, 5, 0))
+    local args = {
+        [1] = workspace.Interactables.Workbench,
+        [2] = "workbenchblueprint"..item.."",
+    }
+
+    game:GetService("ReplicatedStorage").Interactables.interaction:FireServer(unpack(args))
+    wait(0.01)
+    char:WaitForChild("HumanoidRootPart").CFrame = plrorigpos
+    wait(1.7)
+    local args = {
+        [1] = workspace.Interactables.Workbench,
+        [2] = "workbench",
+    }
+
+    game:GetService("ReplicatedStorage").Interactables.interaction:FireServer(unpack(args))
+    wait(5.1)
+    game.Players.LocalPlayer.Character:PivotTo(workbench:GetPivot() + Vector3.new(0, 5, 0))
+    wait(2)
+    char:WaitForChild("HumanoidRootPart").CFrame = plrorigpos
+end
+function notify(title, text, icon, duration)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title or "N/A",
+        Text = text or "N/A",
+        Icon = icon or "rbxassetid://6026568227",
+        duration = duration or 3
+    })
+end
+--scripts
+if allowmusic == true then
+    if workspace.activePlayers[plr.Name].HumanoidRootPart:FindFirstChild(settingz.custommusic) then
+        print("music alr playing bruv!!")
+    else
+        workspace.ServerStuff.playAudio:FireServer({"songs"}, ""..settingz.custommusic.."", char.PrimaryPart)
+    end
+end
+notify("CharScript","Getting Item...","rbxassetid://6026568227","4")
+spawn(settingz.itemtospawn)
+notify("CharScript","Got Item, enjoy!","rbxassetid://6026568227","3")
+
+
+--kbinds
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent == true then
+        return
+    end
+end)
+
+char:WaitForChild("Humanoid").Died:Connect(function()
+    humanoiddied = true
+end)
+
+-- this is poorly coded, enjoy.
